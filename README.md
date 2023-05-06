@@ -5,6 +5,6 @@
 
 
 ## What does this plugin?
- - `/wdreload` command
+ - `/wdreload` command (**DO NOT USE IN PRODUCTION**)
  - `/wdplugins` command
 
