@@ -14,6 +14,7 @@ on:
 
 jobs:
   build:
+    permissions: read-all
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +47,8 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "${{ steps.metadata.outputs.VERSION }}"
+        draft: true
+        automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
         prerelease: false
         title: "Release v${{ steps.metadata.outputs.VERSION }}"
         files: |
