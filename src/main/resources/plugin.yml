@@ -1,0 +1,8 @@
+name: "WD-Utils"
+author: "xxAROX"
+version: "1.0.0"
+main: "xxAROX.WDUtils.WDUtilsPlugin"
+
+permissions:
+  "wdutils.reload":
+    description: "Allows to reload the plugins"
