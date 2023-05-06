@@ -4,14 +4,16 @@ import dev.waterdog.waterdogpe.ProxyServer;
 import dev.waterdog.waterdogpe.command.Command;
 import dev.waterdog.waterdogpe.command.CommandSender;
 import dev.waterdog.waterdogpe.command.CommandSettings;
+import xxAROX.WDUtils.util.Permissions;
 
 public class ReloadCommand extends Command {
     public ReloadCommand() {
-        super("wdreload",
+        super(
+                "wdreload",
                 CommandSettings.builder()
                         .setDescription("Reload plugins")
                         .setAliases("wdrl")
-                        .setPermission("wdutils.reload")
+                        .setPermission(Permissions.reload)
                         .build()
         );
     }
