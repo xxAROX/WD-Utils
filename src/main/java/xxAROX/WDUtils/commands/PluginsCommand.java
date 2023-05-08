@@ -25,7 +25,7 @@ public class PluginsCommand extends Command {
             if (list.length() > 0) list.append("§f, ");
             list.append(plugin.isEnabled() ? "§a" : "§c").append(plugin.getDescription().getName()).append(" ").append(plugin.getDescription().getVersion());
         }
-        commandSender.sendMessage("Plugins (" + String.valueOf(plugins.size()) + "): " + list);
+        commandSender.sendMessage("Plugins (" + plugins.size() + "): " + list);
         return true;
     }
 }
