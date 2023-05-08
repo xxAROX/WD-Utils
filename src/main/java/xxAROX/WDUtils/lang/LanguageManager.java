@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import xxAROX.WDUtils.event.lang.LanguagesLoadEvent;
 import xxAROX.WDUtils.util.Permissions;
 
 import java.io.BufferedReader;
@@ -211,6 +212,7 @@ public final class LanguageManager {
                 }
                 languages.clear();
                 languages.putAll(langs);
+                ProxyServer.getInstance().getEventManager().callEvent(new LanguagesLoadEvent(languages));
             } catch (IOException | InvalidKeyException e) {
                 commandSender.sendMessage("§o§cError: " + e.getMessage());
             } finally {
