@@ -162,10 +162,10 @@ public final class LanguageManager {
         this.access_token = access_token;
         reload(ProxyServer.getInstance().getConsoleSender());
     }
-    public LanguageManager(@NonNull String owner, @NonNull String repository, @NonNull String branch) {
+    public LanguageManager(String owner, String repository, String branch) {
         this(owner, repository, branch, null);
     }
-    public LanguageManager(@NonNull String owner, @NonNull String repository) {
+    public LanguageManager(String owner, String repository) {
         this(owner, repository, "main", null);
     }
 
@@ -240,7 +240,7 @@ public final class LanguageManager {
         return languages.containsKey(locale);
     }
 
-    public String translate(@Nullable CommandSender target, @NonNull String key, @Nullable Map<String, String> replacements) {
+    public String translate(@Nullable CommandSender target, @NonNull String key, @NonNull Map<String, String> replacements) {
         Language language = ((target instanceof ProxiedPlayer) ? (this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString())) : null);
         if (language == null) language = fallback;
         String translation = language.getTranslation(key);
@@ -253,6 +253,10 @@ public final class LanguageManager {
         }
         for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue());
         return translation;
+    }
+
+    public String translate(@Nullable CommandSender target, @NonNull String key) {
+        return translate(target, key, new HashMap<>());
     }
 
     private String getUrl(URL url, int timeout) throws IOException {
