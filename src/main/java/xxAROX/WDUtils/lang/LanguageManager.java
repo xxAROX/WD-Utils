@@ -151,7 +151,7 @@ public final class LanguageManager {
     @Setter @Getter private Integer timeout = 5000;
 
     private final MainLogger logger;
-    @Getter private Language fallback = null;
+    @Getter @Setter private String fallback = "en_US";
     @Getter private final HashMap<String, Language> languages = new HashMap<>();
 
 
@@ -233,25 +233,21 @@ public final class LanguageManager {
         languages.put(language.getLocale(), language);
     }
 
-    public void setFallback(Language fallback) throws InvalidKeyException {
-        if (languages.containsKey(fallback.getLocale())) register(fallback);
-        this.fallback = fallback;
-    }
-
     public boolean isRegistered(String locale){
         return languages.containsKey(locale);
     }
 
     public String translate(@Nullable CommandSender target, @NonNull String key, @NonNull Map<String, String> replacements) {
         Language language = ((target instanceof ProxiedPlayer) ? (this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString())) : null);
-        if (language == null) language = fallback;
+        if (language == null) language = languages.get(fallback);
+        if (language == null) {
+            logger.error("Unknown fallback language " + fallback);
+            return "";
+        }
         String translation = language.getTranslation(key);
         if (translation == null) {
-            String defaultTranslation = fallback.getTranslation(key);
-            if (defaultTranslation == null) {
-                logger.error("Unknown translation key " + key);
-                return "";
-            } else translation = defaultTranslation;
+            logger.error("Unknown translation key " + key);
+            return "";
         }
         for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue());
         return translation;
