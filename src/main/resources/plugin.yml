@@ -1,6 +1,6 @@
 name: "WD-Utils"
 author: "xxAROX"
-version: "1.0.0"
+version: "1.0.1"
 main: "xxAROX.WDUtils.WDUtilsPlugin"
 
 permissions:
@@ -8,3 +8,5 @@ permissions:
     description: "Allows to reload the plugins"
   "waterdog.command.plugins":
     description: "Allows to see plugins"
+  "waterdog.command.lang.reload":
+    description: "Allows to reload any language-manager"

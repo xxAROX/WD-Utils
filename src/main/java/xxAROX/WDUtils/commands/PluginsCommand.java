@@ -23,10 +23,9 @@ public class PluginsCommand extends Command {
         var plugins = commandSender.getProxy().getPluginManager().getPlugins();
         for (Plugin plugin : plugins) {
             if (list.length() > 0) list.append("§f, ");
-            list.append(plugin.isEnabled() ? "§a" : "§c");
-            list.append(plugin.getDescription().getName());
+            list.append(plugin.isEnabled() ? "§a" : "§c").append(plugin.getDescription().getName()).append(" ").append(plugin.getDescription().getVersion());
         }
-        commandSender.sendMessage("Plugins (" + String.valueOf(plugins.size()) + "): " + list);
+        commandSender.sendMessage("Plugins (" + plugins.size() + "): " + list);
         return true;
     }
 }

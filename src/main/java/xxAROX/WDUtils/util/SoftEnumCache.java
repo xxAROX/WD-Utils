@@ -4,12 +4,15 @@ import dev.waterdog.waterdogpe.ProxyServer;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import jline.internal.Nullable;
 import lombok.Getter;
+import org.cloudburstmc.protocol.bedrock.data.command.CommandEnumConstraint;
 import org.cloudburstmc.protocol.bedrock.data.command.CommandEnumData;
 import org.cloudburstmc.protocol.bedrock.data.command.SoftEnumUpdateType;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateSoftEnumPacket;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public final class SoftEnumCache {
     @Getter
@@ -30,6 +33,13 @@ public final class SoftEnumCache {
             enums.put(enumData.getName().toLowerCase(), enumData);
             broadcastSoftEnum(enumData, SoftEnumUpdateType.REPLACE);
         } else add(enumData);
+    }
+
+    public static void update(String name, Map<String, Set<CommandEnumConstraint>> values, boolean isSoft) {
+        if (enums.containsKey(name.toLowerCase())) {
+            enums.put(name.toLowerCase(), new CommandEnumData(name, values, isSoft));
+            broadcastSoftEnum(enums.get(name.toLowerCase()), SoftEnumUpdateType.REPLACE);
+        } else add(new CommandEnumData(name, values, isSoft));
     }
 
     public static void remove(CommandEnumData enumData) {
