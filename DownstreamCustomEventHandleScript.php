@@ -20,7 +20,7 @@ class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
-	public static dispatch_command(Player $player, string $command_line): void{
+	public static function dispatch_command(Player $player, string $command_line): void{
 	    if (str_starts_with($command_line, "/")) $command_line = substr($command_line, 1);
 	    $player->getNetworkSession()->sendPacket(ScriptCustomEventPacket::create(self::IDENTIFIER . "dispatch_command", $command_line)));
 	}

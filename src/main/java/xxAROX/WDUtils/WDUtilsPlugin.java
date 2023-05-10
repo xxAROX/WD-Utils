@@ -10,6 +10,7 @@ import org.cloudburstmc.protocol.bedrock.packet.UpdateSoftEnumPacket;
 import org.cloudburstmc.protocol.common.PacketSignal;
 import xxAROX.WDUtils.commands.PluginsCommand;
 import xxAROX.WDUtils.commands.ReloadCommand;
+import xxAROX.WDUtils.lang.LanguageManager;
 
 public class WDUtilsPlugin extends Plugin {
     public static final String IDENTIFIER = "waterdogpe:";
