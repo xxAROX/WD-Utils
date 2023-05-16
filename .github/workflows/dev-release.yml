@@ -39,7 +39,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: false
-          automatic_release_tag: "snapshot"
+          automatic_release_tag: "dev"
           prerelease: true
           title: "Snapshot release v${{ steps.metadata.outputs.VERSION }}"
           files: |
