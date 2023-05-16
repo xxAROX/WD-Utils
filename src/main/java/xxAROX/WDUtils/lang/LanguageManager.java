@@ -101,13 +101,13 @@ public final class LanguageManager {
             return;
         }
         boolean first_time = languages.size() == 0;
-        String reloading = (first_time ? "Loading languages" : "Reloading languages") + " from " + getFullRepository();
-        logger.info(reloading);
+        String reloading = (first_time ? "L" : "Rel") + "oading languages from " + getFullRepository();
+        commandSender.sendMessage(reloading);
         if (!(commandSender instanceof ConsoleCommandSender)) logger.debug(reloading);
 
         if (first_time && access_token == null) {
             String message = "Language repository should be public or an access token should be provided!";
-            commandSender.sendMessage(message);
+            commandSender.sendMessage("§c§o" + message);
             if (!(commandSender instanceof ConsoleCommandSender)) logger.warning(message);
         }
         fetchLanguages(commandSender, first_time);
@@ -165,7 +165,7 @@ public final class LanguageManager {
     }
 
     public String translate(@Nullable CommandSender target, @NonNull String key, @NonNull Map<String, String> replacements) {
-        Language language = ((target instanceof ProxiedPlayer) ? (this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString())) : null);
+        Language language = target instanceof ProxiedPlayer ? this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString()) : languages.get(getFallback());
         if (language == null) language = languages.get(fallback);
         if (language == null) {
             logger.error("Unknown fallback language " + fallback);
