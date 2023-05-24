@@ -129,11 +129,13 @@ public final class LanguageManager {
                         String lang = getUrl(new URL(raw + locale + ".json"), timeout);
                         if (lang.contains("404: Not Found")) {
                             commandSender.sendMessage("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
+                            if (!(commandSender instanceof ConsoleCommandSender)) logger.error("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
                             continue;
                         }
                         JsonObject json = new Gson().fromJson(lang, JsonObject.class);
                         if (!(json.has("name") && !json.get("name").isJsonNull())) {
                             commandSender.sendMessage("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
+                            if (!(commandSender instanceof ConsoleCommandSender)) logger.error("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
                             continue;
                         }
                         langs.put(locale, new Language(locale, new Gson().fromJson(lang, JsonObject.class)));
@@ -143,13 +145,12 @@ public final class LanguageManager {
                 }
                 languages.clear();
                 languages.putAll(langs);
+                String reloaded = (first_time ? "Loaded" : "Reloaded") + " " + languages.size() + " language" + (languages.size() == 1 ? "" : "s") + "!";
+                commandSender.sendMessage(reloaded);
+                if (!(commandSender instanceof ConsoleCommandSender)) logger.info(reloaded);
                 ProxyServer.getInstance().getEventManager().callEvent(new LanguagesLoadEvent(languages));
             } catch (IOException e) {
                 commandSender.sendMessage("§o§cError: " + e.getMessage());
-            } finally {
-                String reloaded = (first_time ? "Loaded" : "Reloaded") + " " + languages.size() + " language" + (languages.size() == 1 ? "" : "s") + "!";
-                logger.info(reloaded);
-                if (!(commandSender instanceof ConsoleCommandSender)) logger.debug(reloaded);
             }
         });
     }
