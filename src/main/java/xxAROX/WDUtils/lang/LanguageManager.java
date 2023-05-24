@@ -181,7 +181,7 @@ public final class LanguageManager {
             logger.error("Unknown translation key " + key);
             return key;
         }
-        for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue() == null ? entry.getKey() : entry.getValue());
         return translation;
     }
 
