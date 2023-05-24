@@ -125,17 +125,21 @@ public final class LanguageManager {
                 HashMap<String, Language> langs = new HashMap<>();
                 List<String> locales = new Gson().fromJson(raw_locales, JsonArray.class).asList().stream().map(JsonElement::getAsString).toList();
                 for (String locale : locales) {
-                    String lang = getUrl(new URL(raw + locale + ".json"), timeout);
-                    if (lang.contains("404: Not Found")) {
-                        commandSender.sendMessage("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
-                        continue;
+                    try {
+                        String lang = getUrl(new URL(raw + locale + ".json"), timeout);
+                        if (lang.contains("404: Not Found")) {
+                            commandSender.sendMessage("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
+                            continue;
+                        }
+                        JsonObject json = new Gson().fromJson(lang, JsonObject.class);
+                        if (!(json.has("name") && !json.get("name").isJsonNull())) {
+                            commandSender.sendMessage("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
+                            continue;
+                        }
+                        langs.put(locale, new Language(locale, new Gson().fromJson(lang, JsonObject.class)));
+                    } catch (Throwable e) {
+                        commandSender.sendMessage("§o§cError: " + e.getMessage());
                     }
-                    JsonObject json = new Gson().fromJson(lang, JsonObject.class);
-                    if (!(json.has("name") && !json.get("name").isJsonNull())) {
-                        commandSender.sendMessage("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
-                        continue;
-                    }
-                    langs.put(locale, new Language(locale, new Gson().fromJson(lang, JsonObject.class)));
                 }
                 languages.clear();
                 languages.putAll(langs);
