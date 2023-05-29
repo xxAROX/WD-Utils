@@ -101,13 +101,13 @@ public final class LanguageManager {
             return;
         }
         boolean first_time = languages.size() == 0;
-        String reloading = (first_time ? "Loading languages" : "Reloading languages") + " from " + getFullRepository();
-        logger.info(reloading);
+        String reloading = (first_time ? "L" : "Rel") + "oading languages from " + getFullRepository();
+        commandSender.sendMessage(reloading);
         if (!(commandSender instanceof ConsoleCommandSender)) logger.debug(reloading);
 
         if (first_time && access_token == null) {
             String message = "Language repository should be public or an access token should be provided!";
-            commandSender.sendMessage(message);
+            commandSender.sendMessage("§c§o" + message);
             if (!(commandSender instanceof ConsoleCommandSender)) logger.warning(message);
         }
         fetchLanguages(commandSender, first_time);
@@ -125,27 +125,32 @@ public final class LanguageManager {
                 HashMap<String, Language> langs = new HashMap<>();
                 List<String> locales = new Gson().fromJson(raw_locales, JsonArray.class).asList().stream().map(JsonElement::getAsString).toList();
                 for (String locale : locales) {
-                    String lang = getUrl(new URL(raw + locale + ".json"), timeout);
-                    if (lang.contains("404: Not Found")) {
-                        commandSender.sendMessage("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
-                        continue;
+                    try {
+                        String lang = getUrl(new URL(raw + locale + ".json"), timeout);
+                        if (lang.contains("404: Not Found")) {
+                            commandSender.sendMessage("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
+                            if (!(commandSender instanceof ConsoleCommandSender)) logger.error("§c§oError while loading " + locale + ": File '" + getRepositoryFileUrl(locale + ".json") + "' not found!");
+                            continue;
+                        }
+                        JsonObject json = new Gson().fromJson(lang, JsonObject.class);
+                        if (!(json.has("name") && !json.get("name").isJsonNull())) {
+                            commandSender.sendMessage("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
+                            if (!(commandSender instanceof ConsoleCommandSender)) logger.error("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
+                            continue;
+                        }
+                        langs.put(locale, new Language(locale, new Gson().fromJson(lang, JsonObject.class)));
+                    } catch (Throwable e) {
+                        commandSender.sendMessage("§o§cError: " + e.getMessage());
                     }
-                    JsonObject json = new Gson().fromJson(lang, JsonObject.class);
-                    if (!(json.has("name") && !json.get("name").isJsonNull())) {
-                        commandSender.sendMessage("§c§oError while loading " + locale + ": Translation key 'name' not found in '" + getRepositoryFileUrl(locale + ".json") + "'!");
-                        continue;
-                    }
-                    langs.put(locale, new Language(locale, new Gson().fromJson(lang, JsonObject.class)));
                 }
                 languages.clear();
                 languages.putAll(langs);
+                String reloaded = (first_time ? "Loaded" : "Reloaded") + " " + languages.size() + " language" + (languages.size() == 1 ? "" : "s") + "!";
+                commandSender.sendMessage(reloaded);
+                if (!(commandSender instanceof ConsoleCommandSender)) logger.info(reloaded);
                 ProxyServer.getInstance().getEventManager().callEvent(new LanguagesLoadEvent(languages));
             } catch (IOException e) {
                 commandSender.sendMessage("§o§cError: " + e.getMessage());
-            } finally {
-                String reloaded = (first_time ? "Loaded" : "Reloaded") + " " + languages.size() + " language" + (languages.size() == 1 ? "" : "s") + "!";
-                logger.info(reloaded);
-                if (!(commandSender instanceof ConsoleCommandSender)) logger.debug(reloaded);
             }
         });
     }
@@ -165,7 +170,7 @@ public final class LanguageManager {
     }
 
     public String translate(@Nullable CommandSender target, @NonNull String key, @NonNull Map<String, String> replacements) {
-        Language language = ((target instanceof ProxiedPlayer) ? (this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString())) : null);
+        Language language = target instanceof ProxiedPlayer ? this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString()) : languages.get(getFallback());
         if (language == null) language = languages.get(fallback);
         if (language == null) {
             logger.error("Unknown fallback language " + fallback);
@@ -176,7 +181,7 @@ public final class LanguageManager {
             logger.error("Unknown translation key " + key);
             return key;
         }
-        for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue() == null ? entry.getKey() : entry.getValue());
         return translation;
     }
 

@@ -62,7 +62,6 @@ public final class SoftEnumCache {
     }
 
     private static <T extends BedrockPacket> void broadcastPacket(T packet) {
-        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayerManager().getPlayers().values())
-            player.sendPacket(packet);
+        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayerManager().getPlayers().values()) player.sendPacket(packet);
     }
 }

@@ -22,11 +22,9 @@ public class WDUtilsPlugin extends Plugin {
 
     @Override
     public void onEnable() {
-        getProxy().getCommandMap().registerCommand(new ReloadCommand());
-        getProxy().getCommandMap().registerCommand(new PluginsCommand());
         ProtocolCodecs.addUpdater((builder, bedrockCodec) -> {
-            BedrockPacketDefinition<UpdateSoftEnumPacket> updateSoftEnumPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(UpdateSoftEnumPacket.class);
-            builder.registerPacket(UpdateSoftEnumPacket::new, updateSoftEnumPacketBedrockPacketDefinition.getSerializer(), updateSoftEnumPacketBedrockPacketDefinition.getId());
+            BedrockPacketDefinition<UpdateSoftEnumPacket> updateSoftEnumDefinition = bedrockCodec.getPacketDefinition(UpdateSoftEnumPacket.class);
+            builder.registerPacket(UpdateSoftEnumPacket::new, updateSoftEnumDefinition.getSerializer(), updateSoftEnumDefinition.getId());
 
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
                 BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
@@ -47,5 +45,7 @@ public class WDUtilsPlugin extends Plugin {
                 return PacketSignal.UNHANDLED;
             }));
         }
+        getProxy().getCommandMap().registerCommand(new ReloadCommand());
+        getProxy().getCommandMap().registerCommand(new PluginsCommand());
     }
 }
