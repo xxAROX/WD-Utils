@@ -19,7 +19,6 @@ public final class Language {
         this.locale = locale;
         name = json.get("name").getAsString();
         for (Map.Entry<String, JsonElement> entry : json.asMap().entrySet()) translations.put(entry.getKey(), entry.getValue().getAsString());
-        System.out.println(translations);
     }
 
     @Nullable
