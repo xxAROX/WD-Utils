@@ -1,7 +1,9 @@
 name: "WD-Utils"
 author: "xxAROX"
-version: "1.0.1"
+version: "1.0.2"
 main: "xxAROX.WDUtils.WDUtilsPlugin"
+softdepend:
+  - "WD-Forms"
 
 permissions:
   "waterdog.command.reload":

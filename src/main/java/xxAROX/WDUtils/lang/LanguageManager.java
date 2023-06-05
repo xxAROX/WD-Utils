@@ -11,10 +11,9 @@ import dev.waterdog.waterdogpe.logger.MainLogger;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.utils.types.TranslationContainer;
 import jline.internal.Nullable;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.Accessors;
+import xxAROX.WDUtils.WDUtilsPlugin;
 import xxAROX.WDUtils.event.lang.LanguagesLoadEvent;
 import xxAROX.WDUtils.util.Permissions;
 
@@ -25,7 +24,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ToString
 public final class LanguageManager {
@@ -72,6 +72,7 @@ public final class LanguageManager {
     private final MainLogger logger;
     @Getter @Setter private String fallback = "en_US";
     @Getter private final HashMap<String, Language> languages = new HashMap<>();
+    @Getter private final Options options = new Options();
 
 
     public LanguageManager(@NonNull String owner, @NonNull String repository, @NonNull String branch, @Nullable String access_token) {
@@ -80,6 +81,7 @@ public final class LanguageManager {
         this.repository = repository;
         this.branch = branch;
         this.access_token = access_token;
+        WDUtilsPlugin.language_managers.add(this);
         reload(ProxyServer.getInstance().getConsoleSender());
     }
     public LanguageManager(String owner, String repository, String branch) {
@@ -174,13 +176,27 @@ public final class LanguageManager {
         if (language == null) language = languages.get(fallback);
         if (language == null) {
             logger.error("Unknown fallback language " + fallback);
+            logger.info(languages.keySet().toString());
             return key;
         }
         String translation = language.getTranslation(key);
         if (translation == null) {
-            logger.error("Unknown translation key " + key);
-            return key;
+            final String regex = "%([\\w._]+)";
+            final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(key);
+            List<String> keys = new ArrayList<>();
+            while (matcher.find()) {
+                for (int i = 1; i <= matcher.groupCount(); i++) keys.add(matcher.group(i));
+            }
+            if (keys.size() > 0) {
+                translation = key;
+                for (String k : keys) {
+                    String t = language.getTranslation(k);
+                    if (t != null) translation = translation.replace(k, translate(target, k, replacements));
+                }
+            } else logger.error("Unknown translation key " + key);
         }
+        if (translation == null) translation = key;
         for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue() == null ? entry.getKey() : entry.getValue());
         return translation;
     }
@@ -219,5 +235,11 @@ public final class LanguageManager {
         in.close();
         con.disconnect();
         return content.toString();
+    }
+
+    @Accessors(chain = true) @Getter @Setter
+    @ToString @AllArgsConstructor @NoArgsConstructor
+    public static class Options {
+        protected boolean translate_forms = false;
     }
 }
