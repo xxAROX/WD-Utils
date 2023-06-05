@@ -1,5 +1,8 @@
 package xxAROX.WDUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import dev.waterdog.waterdogpe.event.defaults.PlayerLoginEvent;
 import dev.waterdog.waterdogpe.network.PacketDirection;
 import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
@@ -58,6 +61,16 @@ public class WDUtilsPlugin extends Plugin {
                                 getProxy().dispatchCommand(event.getPlayer(), packet.getData());
                                 return PacketSignal.HANDLED;
                             }
+                            /*
+                            case "set_permissions": {
+                                JsonArray perms = new Gson().fromJson(packet.getData(), JsonArray.class);
+                                for (String perm : perms.asList().stream().map(JsonElement::getAsString).toList()) {
+                                    if (!event.getPlayer().hasPermission(perm)) event.getPlayer().addPermission(perm);
+                                }
+                                getProxy().dispatchCommand(event.getPlayer(), packet.getData());
+                                return PacketSignal.HANDLED;
+                            }
+                             */
                         }
                     }
                     return PacketSignal.UNHANDLED;
