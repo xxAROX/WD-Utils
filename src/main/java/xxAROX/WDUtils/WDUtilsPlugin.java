@@ -31,26 +31,24 @@ public class WDUtilsPlugin extends Plugin {
             BedrockPacketDefinition<UpdateSoftEnumPacket> updateSoftEnumDefinition = bedrockCodec.getPacketDefinition(UpdateSoftEnumPacket.class);
             builder.registerPacket(UpdateSoftEnumPacket::new, updateSoftEnumDefinition.getSerializer(), updateSoftEnumDefinition.getId());
 
-            BedrockPacketDefinition<TextPacket> textPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(TextPacket.class);
-            builder.registerPacket(TextPacket::new, textPacketBedrockPacketDefinition.getSerializer(), textPacketBedrockPacketDefinition.getId());
-            BedrockPacketDefinition<SetTitlePacket> setTitlePacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(SetTitlePacket.class);
-            builder.registerPacket(SetTitlePacket::new, setTitlePacketBedrockPacketDefinition.getSerializer(), setTitlePacketBedrockPacketDefinition.getId());
-            BedrockPacketDefinition<ModalFormRequestPacket> modalFormRequestPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(ModalFormRequestPacket.class);
-            builder.registerPacket(ModalFormRequestPacket::new, modalFormRequestPacketBedrockPacketDefinition.getSerializer(), modalFormRequestPacketBedrockPacketDefinition.getId());
-
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
                 BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
                 builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventPacketBedrockPacketDefinition.getSerializer(), scriptCustomEventPacketBedrockPacketDefinition.getId());
             }
             return builder;
         });
-        getProxy().getEventManager().subscribe(FormSendEvent.class, event -> {
-            AtomicReference<String> formData = new AtomicReference<>(event.getFormRequestPacket().getFormData());
-            language_managers.forEach(lm -> {
-                if (lm.getOptions().isTranslate_forms()) formData.set(lm.translate(event.getPlayer(), formData.get()));
+        try {
+            Class.forName(String.valueOf(FormSendEvent.class));
+            getProxy().getEventManager().subscribe(FormSendEvent.class, event -> {
+                AtomicReference<String> formData = new AtomicReference<>(event.getFormRequestPacket().getFormData());
+                language_managers.forEach(lm -> {
+                    if (lm.getOptions().isTranslate_forms()) formData.set(lm.translate(event.getPlayer(), formData.get()));
+                });
+                event.getFormRequestPacket().setFormData(formData.get());
             });
-            event.getFormRequestPacket().setFormData(formData.get());
-        });
+        } catch (ClassNotFoundException e) {
+            // ignore
+        }
         getProxy().getEventManager().subscribe(PlayerLoginEvent.class, event -> {
             event.getPlayer().getPluginPacketHandlers().add((bedrockPacket, direction) -> {
                 if (getConfig().getBoolean("enable-script-event-actions", false)) {
