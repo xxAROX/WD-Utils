@@ -9,7 +9,6 @@ import dev.waterdog.waterdogpe.network.PacketDirection;
 import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
-import lombok.Getter;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockPacketDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ScriptCustomEventPacket;
@@ -26,13 +25,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class WDUtilsPlugin extends Plugin {
-    @Getter private static WDUtilsPlugin instance;
     public static final String IDENTIFIER = "waterdogpe:";
     public static final List<LanguageManager> language_managers = new ArrayList<>();
 
     @Override
     public void onStartup() {
-        instance = this;
         saveResource("config.yml");
     }
 
