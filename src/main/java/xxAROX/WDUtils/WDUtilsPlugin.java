@@ -70,8 +70,7 @@ public class WDUtilsPlugin extends Plugin {
 
                 if (getConfig().getBoolean("enable-script-event-actions", false)) {
                     if (direction.equals(PacketDirection.FROM_SERVER) && bedrockPacket instanceof ScriptCustomEventPacket packet) {
-                        if (!packet.getEventName().toLowerCase().startsWith(IDENTIFIER))
-                            return PacketSignal.HANDLED; // dylan thinks this is a serverbound packet
+                        if (!packet.getEventName().toLowerCase().startsWith(IDENTIFIER)) return PacketSignal.HANDLED; // dylan thinks this is a serverbound packet
 
                         switch (packet.getEventName().toLowerCase().replace(IDENTIFIER, "")) {
                             case "dispatch_command": {
