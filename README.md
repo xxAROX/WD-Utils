@@ -5,7 +5,19 @@
 
 
 ### What does this plugin?
- - [`ScriptCustomEventPacket`](./docs/ScriptCustomEventPacket.md)
- - `/wdreload` command (**DO NOT USE IN PRODUCTION**)
- - `/wdplugins` command
+- You have the positions of the players
+<details>
+
+```java
+package xxAROX.WDUtils.Test;
+
+import xxAROX.WDUtils.WDUtilsPlugin;
+
+WDUtilsPlugin.getInstance
+```
+
+  </details>
+- [`ScriptCustomEventPacket`](./docs/ScriptCustomEventPacket.md)
+- `/wdreload` command (**DO NOT USE IN PRODUCTION**)
+- `/wdplugins` command
 
