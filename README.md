@@ -6,17 +6,7 @@
 
 ### What does this plugin?
 - You have the positions of the players
-<details>
-
-```java
-package xxAROX.WDUtils.Test;
-
-import xxAROX.WDUtils.WDUtilsPlugin;
-
-WDUtilsPlugin.getInstance
-```
-
-  </details>
+- You can play event sounds via api to a player
 - [`ScriptCustomEventPacket`](./docs/ScriptCustomEventPacket.md)
 - `/wdreload` command (**DO NOT USE IN PRODUCTION**)
 - `/wdplugins` command

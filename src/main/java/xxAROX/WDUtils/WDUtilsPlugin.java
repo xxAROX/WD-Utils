@@ -10,6 +10,7 @@ import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockPacketDefinition;
+import org.cloudburstmc.protocol.bedrock.packet.PlaySoundPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ScriptCustomEventPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateSoftEnumPacket;
@@ -98,6 +99,22 @@ public class WDUtilsPlugin extends Plugin {
         });
         getProxy().getCommandMap().registerCommand(new ReloadCommand());
         getProxy().getCommandMap().registerCommand(new PluginsCommand());
+    }
+
+    public static void play_sound(ProxiedPlayer player, String sound_name, float volume, float pitch) {
+        if (!PositionManager.positions.containsKey(player.getXuid())) return;
+        PlaySoundPacket packet = new PlaySoundPacket();
+        packet.setPosition(PositionManager.get(player));
+        packet.setSound(sound_name);
+        packet.setVolume(volume);
+        packet.setPitch(pitch);
+        player.sendPacketImmediately(packet);
+    }
+    public static void play_sound(ProxiedPlayer player, String sound_name, float volume) {
+        play_sound(player, sound_name, volume, 1);
+    }
+    public static void play_sound(ProxiedPlayer player, String sound_name) {
+        play_sound(player, sound_name, 1, 1);
     }
 
     public static void dispatch_command(ProxiedPlayer player, String command_line){

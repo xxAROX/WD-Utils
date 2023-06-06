@@ -10,7 +10,7 @@ use pocketmine\plugin\PluginBase;
 /**
  * @name DownstreamCustomEventHandleScript
  * @main \DownstreamCustomEventHandleScript
- * @version 1.0.4
+ * @version 1.0.5
  * @api 5.0.0
  */
 class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
