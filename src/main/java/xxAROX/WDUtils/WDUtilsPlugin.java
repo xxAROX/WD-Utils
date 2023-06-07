@@ -15,7 +15,7 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ScriptCustomEventPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateSoftEnumPacket;
 import org.cloudburstmc.protocol.common.PacketSignal;
-import xxAROX.WDForms.event.FormSendEvent;
+import xxAROX.WDForms.WDForms;
 import xxAROX.WDUtils.commands.PluginsCommand;
 import xxAROX.WDUtils.commands.ReloadCommand;
 import xxAROX.WDUtils.lang.LanguageManager;
@@ -23,7 +23,6 @@ import xxAROX.WDUtils.managers.PositionManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class WDUtilsPlugin extends Plugin {
     public static final String IDENTIFIER = "waterdogpe:";
@@ -53,17 +52,13 @@ public class WDUtilsPlugin extends Plugin {
             return builder;
         });
         // TRANSLATE FORMS (when needed)
-        try {
-            Class.forName(String.valueOf(FormSendEvent.class));
-            getProxy().getEventManager().subscribe(FormSendEvent.class, event -> {
-                AtomicReference<String> formData = new AtomicReference<>(event.getFormRequestPacket().getFormData());
-                language_managers.forEach(lm -> {
-                    if (lm.getOptions().isTranslate_forms()) formData.set(lm.translate(event.getPlayer(), formData.get()));
-                });
-                event.getFormRequestPacket().setFormData(formData.get());
+        WDForms forms = (WDForms) getProxy().getPluginManager().getPluginByName("WDForms");
+        if (forms != null) {
+            forms.registerTranslator((player, str) -> {
+                String formData = str;
+                for (LanguageManager language_manager : language_managers) formData = language_manager.translate(player, formData);
+                return formData;
             });
-        } catch (ClassNotFoundException e) {
-            // ignore
         }
         getProxy().getEventManager().subscribe(PlayerLoginEvent.class, event -> {
             event.getPlayer().getPluginPacketHandlers().add((bedrockPacket, direction) -> {

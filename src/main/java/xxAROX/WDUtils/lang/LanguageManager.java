@@ -11,8 +11,10 @@ import dev.waterdog.waterdogpe.logger.MainLogger;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.utils.types.TranslationContainer;
 import jline.internal.Nullable;
-import lombok.*;
-import lombok.experimental.Accessors;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.ToString;
 import xxAROX.WDUtils.WDUtilsPlugin;
 import xxAROX.WDUtils.event.lang.LanguagesLoadEvent;
 import xxAROX.WDUtils.util.Permissions;
@@ -72,7 +74,6 @@ public final class LanguageManager {
     private final MainLogger logger;
     @Getter @Setter private String fallback = "en_US";
     @Getter private final HashMap<String, Language> languages = new HashMap<>();
-    @Getter private final Options options = new Options();
 
 
     public LanguageManager(@NonNull String owner, @NonNull String repository, @NonNull String branch, @Nullable String access_token) {
@@ -162,6 +163,7 @@ public final class LanguageManager {
     }
 
     public void register(Language language, boolean override) throws InvalidKeyException {
+        if (language == null) return;
         if (!MINECRAFT_LOCALES.contains(language.getLocale())) throw new InvalidKeyException("Language "+ language.getLocale() +" is not available in minecraft");
         if (!override && isRegistered(language.getLocale())) throw new InvalidKeyException("Trying to overwrite an already registered Language");
         languages.put(language.getLocale(), language);
@@ -172,7 +174,7 @@ public final class LanguageManager {
     }
 
     public String translate(@Nullable CommandSender target, @NonNull String key, @NonNull Map<String, String> replacements) {
-        Language language = target instanceof ProxiedPlayer ? this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString()) : languages.get(getFallback());
+        Language language = target instanceof ProxiedPlayer ? this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString()) : languages.get(fallback);
         if (language == null) language = languages.get(fallback);
         if (language == null) {
             logger.error("Unknown fallback language " + fallback);
@@ -235,11 +237,5 @@ public final class LanguageManager {
         in.close();
         con.disconnect();
         return content.toString();
-    }
-
-    @Accessors(chain = true) @Getter @Setter
-    @ToString @AllArgsConstructor @NoArgsConstructor
-    public static class Options {
-        protected boolean translate_forms = false;
     }
 }

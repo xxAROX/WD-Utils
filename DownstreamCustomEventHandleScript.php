@@ -31,8 +31,8 @@ class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
 				$this->getServer()->dispatchCommand($player, $packet->eventData, true);
 				break;
 			}
-			case "set_permissions":{
-				$pk = MyScriptCustomEventPacket::create(DownstreamCustomEventHandleScript::IDENTIFIER . "set_permissions", json_encode(array_map(fn($_) => $_->getPermission(), $player->getEffectivePermissions())));
+			case "sync_permissions":{
+				$pk = MyScriptCustomEventPacket::create(DownstreamCustomEventHandleScript::IDENTIFIER . "sync_permissions", json_encode(array_map(fn($_) => $_->getPermission(), $player->getEffectivePermissions())));
 				$player->getNetworkSession()->sendDataPacket($pk);
 				break;
 			}
@@ -42,7 +42,7 @@ class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
 
 	public static function dispatch_command(Player $player, string $command_line): void{
 		if (str_starts_with($command_line, "/")) $command_line = substr($command_line, 1); // bypass the '/' confusion convos lmao
-		$player->getNetworkSession()->sendDataPacket(MyScriptCustomEventPacket::create(DownstreamCustomEventHandleScript::IDENTIFIER . "dispatch_command", $command_line)));
+		$player->getNetworkSession()->sendDataPacket(MyScriptCustomEventPacket::create(DownstreamCustomEventHandleScript::IDENTIFIER . "dispatch_command", $command_line));
 	}
 }
 

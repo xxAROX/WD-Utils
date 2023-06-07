@@ -2,7 +2,10 @@ package xxAROX.WDUtils.managers;
 
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import jline.internal.Nullable;
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -30,14 +33,28 @@ public final class PositionManager {
         return positions.getOrDefault(player.getXuid(), null);
     }
 
-    @AllArgsConstructor @ToString
-    @Getter @Setter @Accessors(chain = true)
+    @ToString
+    @Setter @Accessors(chain = true)
     public static final class Position extends Vector3f{
         private float x;
         private float y;
         private float z;
-        private int yaw;
-        private int pitch;
+        @Getter private int yaw;
+        @Getter private int pitch;
+        public Position(float x, float y, float z, int yaw, int pitch) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.yaw = yaw;
+            this.pitch = pitch;
+        }
+        public Position(float x, float y, float z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.yaw = 0;
+            this.pitch = 0;
+        }
         public static Position fromVector3(Vector3f vector3){
             return fromVector3(vector3, false);
         }
@@ -49,6 +66,35 @@ public final class PositionManager {
                     0,
                     0
             );
+        }
+
+        @Override
+        public float getX() {
+            return x;
+        }
+
+        @Override
+        public float getY() {
+            return y;
+        }
+
+        @Override
+        public float getZ() {
+            return z;
+        }
+        @Override
+        public int getFloorX() {
+            return (int) Math.floor(x);
+        }
+
+        @Override
+        public int getFloorY() {
+            return (int) Math.floor(y);
+        }
+
+        @Override
+        public int getFloorZ() {
+            return (int) Math.floor(z);
         }
 
         @NonNull
