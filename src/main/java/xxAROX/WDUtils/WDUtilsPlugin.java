@@ -41,13 +41,13 @@ public class WDUtilsPlugin extends Plugin {
             builder.registerPacket(UpdateSoftEnumPacket::new, updateSoftEnumDefinition.getSerializer(), updateSoftEnumDefinition.getId());
 
             // PlayerAuthInputPacket
-            BedrockPacketDefinition<PlayerAuthInputPacket> playerAuthInputPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(PlayerAuthInputPacket.class);
-            builder.registerPacket(PlayerAuthInputPacket::new, playerAuthInputPacketBedrockPacketDefinition.getSerializer(), playerAuthInputPacketBedrockPacketDefinition.getId());
+            BedrockPacketDefinition<PlayerAuthInputPacket> authInputDefinition = bedrockCodec.getPacketDefinition(PlayerAuthInputPacket.class);
+            builder.registerPacket(PlayerAuthInputPacket::new, authInputDefinition.getSerializer(), authInputDefinition.getId());
 
             // ScriptCustomEventPacket (if enabled)
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
-                BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventPacketBedrockPacketDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
-                builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventPacketBedrockPacketDefinition.getSerializer(), scriptCustomEventPacketBedrockPacketDefinition.getId());
+                BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
+                builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventDefinition.getSerializer(), scriptCustomEventDefinition.getId());
             }
             return builder;
         });
