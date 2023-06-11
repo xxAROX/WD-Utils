@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import dev.waterdog.waterdogpe.event.defaults.PlayerDisconnectedEvent;
 import dev.waterdog.waterdogpe.event.defaults.PlayerLoginEvent;
 import dev.waterdog.waterdogpe.network.PacketDirection;
 import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
@@ -62,38 +63,39 @@ public class WDUtilsPlugin extends Plugin {
                 return formData;
             });
         }
-        getProxy().getEventManager().subscribe(PlayerLoginEvent.class, event -> {
-            event.getPlayer().getPluginPacketHandlers().add((bedrockPacket, direction) -> {
-                if (bedrockPacket instanceof PlayerAuthInputPacket packet) PositionManager.cache(event.getPlayer(), packet);
+        getProxy().getEventManager().subscribe(PlayerDisconnectedEvent.class, playerDisconnectedEvent -> PositionManager.positions.remove(playerDisconnectedEvent.getPlayer().getXuid()));
+        getProxy().getEventManager().subscribe(PlayerLoginEvent.class, event -> event.getPlayer().getPluginPacketHandlers().add((bedrockPacket, direction) -> {
+            if (direction.equals(PacketDirection.FROM_USER) && bedrockPacket instanceof PlayerAuthInputPacket packet) PositionManager.cache(event.getPlayer(), packet);
+            if (getConfig().getBoolean("enable-script-event-actions", false)) {
+                if (direction.equals(PacketDirection.FROM_SERVER) && bedrockPacket instanceof ScriptCustomEventPacket packet) {
+                    if (!packet.getEventName().toLowerCase().startsWith(IDENTIFIER)) return PacketSignal.HANDLED; // dylan thinks this is a serverbound packet
 
-                if (getConfig().getBoolean("enable-script-event-actions", false)) {
-                    if (direction.equals(PacketDirection.FROM_SERVER) && bedrockPacket instanceof ScriptCustomEventPacket packet) {
-                        if (!packet.getEventName().toLowerCase().startsWith(IDENTIFIER)) return PacketSignal.HANDLED; // dylan thinks this is a serverbound packet
-
-                        switch (packet.getEventName().toLowerCase().replace(IDENTIFIER, "")) {
-                            case "dispatch_command": {
-                                getProxy().dispatchCommand(event.getPlayer(), packet.getData());
-                                return PacketSignal.HANDLED;
-                            }
-                            case "set_permissions": {
-                                try {
-                                    JsonArray perms = new Gson().fromJson(packet.getData(), JsonArray.class);
-                                    for (String perm : perms.asList().stream().map(JsonElement::getAsString).toList()) {
-                                        if (!event.getPlayer().hasPermission(perm)) event.getPlayer().addPermission(perm);
-                                    }
-
-                                } catch (JsonSyntaxException e) {
-                                    // ignore
+                    switch (packet.getEventName().toLowerCase().replace(IDENTIFIER, "")) {
+                        case "dispatch_command": {
+                            getProxy().dispatchCommand(event.getPlayer(), packet.getData());
+                            return PacketSignal.HANDLED;
+                        }
+                        case "set_permissions": {
+                            try {
+                                JsonArray perms = new Gson().fromJson(packet.getData(), JsonArray.class);
+                                for (String perm : perms.asList().stream().map(JsonElement::getAsString).toList()) {
+                                    if (!event.getPlayer().hasPermission(perm)) event.getPlayer().addPermission(perm);
                                 }
-                                return PacketSignal.HANDLED;
+
+                            } catch (JsonSyntaxException e) {
+                                // ignore
                             }
+                            return PacketSignal.HANDLED;
+                        }
+                        default: {
+                            // ignore
                         }
                     }
-                    return PacketSignal.UNHANDLED;
                 }
                 return PacketSignal.UNHANDLED;
-            });
-        });
+            }
+            return PacketSignal.UNHANDLED;
+        }));
         getProxy().getCommandMap().registerCommand(new ReloadCommand());
         getProxy().getCommandMap().registerCommand(new PluginsCommand());
     }
