@@ -11,6 +11,7 @@ import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockPacketDefinition;
+import org.cloudburstmc.protocol.bedrock.codec.v291.serializer.PlaySoundSerializer_v291;
 import org.cloudburstmc.protocol.bedrock.codec.v575.serializer.PlayerAuthInputSerializer_v575;
 import org.cloudburstmc.protocol.bedrock.packet.PlaySoundPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -46,6 +47,11 @@ public class WDUtilsPlugin extends Plugin {
             BedrockPacketDefinition<PlayerAuthInputPacket> authInputDefinition = bedrockCodec.getPacketDefinition(PlayerAuthInputPacket.class);
             if (authInputDefinition == null) authInputDefinition = new BedrockPacketDefinition<>(0x90, PlayerAuthInputPacket::new, new PlayerAuthInputSerializer_v575());
             builder.registerPacket(PlayerAuthInputPacket::new, authInputDefinition.getSerializer(), authInputDefinition.getId());
+
+            // PlaySoundPacket
+            BedrockPacketDefinition<PlaySoundPacket> playSoundDefinition = bedrockCodec.getPacketDefinition(PlaySoundPacket.class);
+            if (playSoundDefinition == null) playSoundDefinition = new BedrockPacketDefinition<>(0x56, PlaySoundPacket::new, PlaySoundSerializer_v291.INSTANCE);
+            builder.registerPacket(PlaySoundPacket::new, playSoundDefinition.getSerializer(), playSoundDefinition.getId());
 
             // ScriptCustomEventPacket (if enabled)
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
