@@ -9,7 +9,6 @@ import dev.waterdog.waterdogpe.command.CommandSender;
 import dev.waterdog.waterdogpe.command.ConsoleCommandSender;
 import dev.waterdog.waterdogpe.logger.MainLogger;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
-import dev.waterdog.waterdogpe.utils.types.TranslationContainer;
 import jline.internal.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
@@ -17,7 +16,6 @@ import lombok.Setter;
 import lombok.ToString;
 import xxAROX.WDUtils.WDUtilsPlugin;
 import xxAROX.WDUtils.event.lang.LanguagesLoadEvent;
-import xxAROX.WDUtils.util.Permissions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -93,10 +91,6 @@ public final class LanguageManager {
     }
 
     public void reload(CommandSender commandSender){
-        if (!commandSender.hasPermission(Permissions.lang_reload)) {
-            commandSender.sendMessage(new TranslationContainer("waterdog.command.permission.failed"));
-            return;
-        }
         if (owner == null || repository == null) {
             String message = "Repository credentials are not set!";
             commandSender.sendMessage(message);
@@ -174,10 +168,9 @@ public final class LanguageManager {
     }
 
     public String translate(@Nullable CommandSender target, @NonNull String key, @NonNull Map<String, String> replacements) {
-        Language language = target instanceof ProxiedPlayer ? this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString()) : languages.get(fallback);
+        Language language = target instanceof ProxiedPlayer ? (WDUtilsPlugin.locales.containsKey(target) ? languages.getOrDefault(WDUtilsPlugin.locales.get(target), languages.get(fallback)) : this.languages.get(((ProxiedPlayer) target).getLoginData().getClientData().get("LanguageCode").getAsString())) : languages.get(fallback);
         if (language == null) language = languages.get(fallback);
         if (language == null) {
-            logger.error("Unknown fallback language " + fallback);
             logger.info(languages.keySet().toString());
             return key;
         }
@@ -196,7 +189,7 @@ public final class LanguageManager {
                     String t = language.getTranslation(k);
                     if (t != null) translation = translation.replace(k, translate(target, k, replacements));
                 }
-            } else logger.error("Unknown translation key " + key);
+            }
         }
         if (translation == null) translation = key;
         for (Map.Entry<String, String> entry : replacements.entrySet()) translation = translation.replace(entry.getKey(), entry.getValue() == null ? entry.getKey() : entry.getValue());

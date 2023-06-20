@@ -25,11 +25,13 @@ import xxAROX.WDUtils.lang.LanguageManager;
 import xxAROX.WDUtils.managers.PositionManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class WDUtilsPlugin extends Plugin {
     public static final String IDENTIFIER = "waterdogpe:";
     public static final List<LanguageManager> language_managers = new ArrayList<>();
+    public static final HashMap<ProxiedPlayer, String> locales = new HashMap<>();
 
     @Override
     public void onStartup() {
