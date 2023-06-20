@@ -63,7 +63,7 @@ public class WDUtilsPlugin extends Plugin {
             return builder;
         });
         // TRANSLATE FORMS (when needed)
-        WDForms forms = (WDForms) getProxy().getPluginManager().getPluginByName("WDForms");
+        WDForms forms = (WDForms) getProxy().getPluginManager().getPluginByName("WD-Forms");
         if (forms != null) {
             forms.registerTranslator((player, str) -> {
                 String formData = str;
