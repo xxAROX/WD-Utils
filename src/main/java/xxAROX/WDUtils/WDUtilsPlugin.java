@@ -115,7 +115,9 @@ public class WDUtilsPlugin extends Plugin {
         packet.setSound(sound_name);
         packet.setVolume(volume);
         packet.setPitch(pitch);
-        player.sendPacketImmediately(packet);
+        player.sendPacket(packet);
+        player.sendPacket(packet);
+        player.sendPacket(packet);
     }
     public static void play_sound(ProxiedPlayer player, String sound_name, float volume) {
         play_sound(player, sound_name, volume, 1);
