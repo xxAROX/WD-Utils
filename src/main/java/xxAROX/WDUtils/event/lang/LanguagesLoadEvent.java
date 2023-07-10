@@ -8,8 +8,7 @@ import xxAROX.WDUtils.lang.Language;
 
 import java.util.HashMap;
 
-@AllArgsConstructor
-@Getter @Setter
+@Getter @Setter @AllArgsConstructor
 public class LanguagesLoadEvent extends Event {
     private HashMap<String, Language> languages;
 }

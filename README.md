@@ -5,7 +5,9 @@
 
 
 ### What does this plugin?
- - [`ScriptCustomEventPacket`](./docs/ScriptCustomEventPacket.md)
- - `/wdreload` command (**DO NOT USE IN PRODUCTION**)
- - `/wdplugins` command
+- You have the positions of the players
+- You can play event sounds via api to a player
+- [`ScriptCustomEventPacket`](./docs/ScriptCustomEventPacket.md)
+- `/wdreload` command (**DO NOT USE IN PRODUCTION**)
+- `/wdplugins` command
 

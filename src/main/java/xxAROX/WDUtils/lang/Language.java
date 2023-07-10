@@ -9,10 +9,9 @@ import lombok.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
 public final class Language {
-    private final String locale;
-    private final String name;
+    @Getter private final String locale;
+    @Getter private final String name;
     private final HashMap<String, String> translations = new HashMap<>();
 
     public Language(@NonNull String locale, @NonNull JsonObject json) {
