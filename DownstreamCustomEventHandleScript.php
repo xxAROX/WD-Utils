@@ -55,4 +55,10 @@ class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
  * @project xxCLOUD-Bridge
  */
 class MyScriptCustomEventPacket extends ScriptCustomEventPacket implements ClientboundPacket, ServerboundPacket{
+	public static function create(string $eventName, string $eventData) : MyScriptCustomEventPacket{
+		$result = new MyScriptCustomEventPacket;
+		$result->eventName = $eventName;
+		$result->eventData = $eventData;
+		return $result;
+	}
 }
