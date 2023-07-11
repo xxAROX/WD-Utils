@@ -2,6 +2,7 @@
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
+use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\network\mcpe\protocol\ScriptCustomEventPacket;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
@@ -53,5 +54,5 @@ class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
  * @ide PhpStorm
  * @project xxCLOUD-Bridge
  */
-class MyScriptCustomEventPacket extends ScriptCustomEventPacket implements ClientboundPacket{
+class MyScriptCustomEventPacket extends ScriptCustomEventPacket implements ClientboundPacket, ServerboundPacket{
 }
