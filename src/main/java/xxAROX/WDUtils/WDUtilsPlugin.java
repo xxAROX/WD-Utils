@@ -105,18 +105,17 @@ public class WDUtilsPlugin extends Plugin {
                                 // server_public_address: int   |      null        |  optional  |
                                 // server_public_port: int      |      19132       |  optional  |
                                 JsonObject options = new Gson().fromJson(packet.getData(), JsonObject.class);
+                                if (!options.has("server_name") || options.get("server_name").isJsonNull()) return PacketSignal.HANDLED;
                                 String server_name = options.get("server_name").getAsString();
                                 if (getProxy().getServerInfo(server_name) != null) return PacketSignal.HANDLED;
-                                InetSocketAddress server_address = InetSocketAddress.createUnresolved(options.get("server_address").getAsString(), options.get("server_port").getAsInt());
+                                String server_address = options.get("server_address").getAsString();
+                                if (!options.has("server_address") || options.get("server_address").isJsonNull()) return PacketSignal.HANDLED;
+                                int server_port = !options.has("server_port") || options.get("server_port").isJsonNull() ? 19132 : options.get("server_port").getAsInt();
                                 InetSocketAddress server_public_address = null;
-                                if (options.has("server_public_address")
-                                        || !options.get("server_public_address").isJsonNull()
-                                        && options.has("server_public_port")
-                                        || !options.get("server_public_port").isJsonNull()
-                                ) server_public_address = InetSocketAddress.createUnresolved(options.get("server_public_address").getAsString(), options.get("server_public_address").getAsInt());
+                                if (options.has("server_public_address") || !options.get("server_public_address").isJsonNull() && options.has("server_public_port") || !options.get("server_public_port").isJsonNull()) server_public_address = InetSocketAddress.createUnresolved(options.get("server_public_address").getAsString(), options.get("server_public_address").getAsInt());
                                 BedrockServerInfo server_info = new BedrockServerInfo(
                                         server_name,
-                                        server_address,
+                                        InetSocketAddress.createUnresolved(server_address, server_port),
                                         server_public_address
                                 );
                                 getProxy().registerServerInfo(server_info);
