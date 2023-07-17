@@ -47,18 +47,18 @@ class DownstreamCustomEventHandleScript extends PluginBase implements Listener{
 
 	public static function add_server(Player $player, string $server_name, string $server_address, int $server_port = 19132, ?string $server_public_address = null, int $server_public_port = 19132): void{
 		$player->getNetworkSession()->sendDataPacket(ScriptMessagePacket::create(DownstreamCustomEventHandleScript::IDENTIFIER . "add_server", json_encode([
-		    "server_name" => $server_name,
-		    "server_address" => $server_address,
-		    "server_port" => $server_port,
-		    "server_public_address" => $server_public_address,
-		    "server_public_port" => $server_public_port,
-		]));
+			"server_name" => $server_name,
+			"server_address" => $server_address,
+			"server_port" => $server_port,
+			"server_public_address" => $server_public_address,
+			"server_public_port" => $server_public_port,
+		])));
 	}
 
 
 	public static function remove_server(Player $player, string $server_name): void{
 		$player->getNetworkSession()->sendDataPacket(ScriptMessagePacket::create(DownstreamCustomEventHandleScript::IDENTIFIER . "remove_server", json_encode([
-		    "server_name" => $server_name,
-		]));
+			"server_name" => $server_name,
+		])));
 	}
 }
