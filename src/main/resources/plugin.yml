@@ -1,6 +1,6 @@
 name: "WD-Utils"
 author: "xxAROX"
-version: "1.0.7"
+version: "1.0.8"
 main: "xxAROX.WDUtils.WDUtilsPlugin"
 softdepend:
   - "WD-Forms"
