@@ -1,17 +1,16 @@
 package xxAROX.WDUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import dev.waterdog.waterdogpe.event.defaults.PlayerDisconnectedEvent;
 import dev.waterdog.waterdogpe.event.defaults.PlayerLoginEvent;
 import dev.waterdog.waterdogpe.network.PacketDirection;
 import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
+import dev.waterdog.waterdogpe.network.serverinfo.BedrockServerInfo;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockPacketDefinition;
 import org.cloudburstmc.protocol.bedrock.codec.v291.serializer.PlaySoundSerializer_v291;
+import org.cloudburstmc.protocol.bedrock.codec.v291.serializer.ScriptCustomEventSerializer_v291;
 import org.cloudburstmc.protocol.bedrock.codec.v575.serializer.PlayerAuthInputSerializer_v575;
 import org.cloudburstmc.protocol.bedrock.packet.PlaySoundPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -24,6 +23,7 @@ import xxAROX.WDUtils.commands.ReloadCommand;
 import xxAROX.WDUtils.lang.LanguageManager;
 import xxAROX.WDUtils.managers.PositionManager;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +59,8 @@ public class WDUtilsPlugin extends Plugin {
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
                 BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
                 builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventDefinition.getSerializer(), scriptCustomEventDefinition.getId());
+                scriptCustomEventDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
+                if (scriptCustomEventDefinition == null) builder.registerPacket(ScriptCustomEventPacket::new, ScriptCustomEventSerializer_v291.INSTANCE, 0xb1);
             }
             return builder;
         });
@@ -90,6 +92,46 @@ public class WDUtilsPlugin extends Plugin {
                                     if (!event.getPlayer().hasPermission(perm)) event.getPlayer().addPermission(perm);
                                 }
 
+                            } catch (JsonSyntaxException e) {
+                                // ignore
+                            }
+                            return PacketSignal.HANDLED;
+                        }
+                        case "add_server": {
+                            try {
+                                // server_name: string          | (case-sensitive) |  required  |
+                                // server_address: string       |                  |  required  |
+                                // server_port: int             |                  |  required  |
+                                // server_public_address: int   |      null        |  optional  |
+                                // server_public_port: int      |      19132       |  optional  |
+                                JsonObject options = new Gson().fromJson(packet.getData(), JsonObject.class);
+                                String server_name = options.get("server_name").getAsString();
+                                InetSocketAddress server_address = InetSocketAddress.createUnresolved(options.get("server_address").getAsString(), options.get("server_port").getAsInt());
+                                InetSocketAddress server_public_address = null;
+                                if (options.has("server_public_address")
+                                        || !options.get("server_public_address").isJsonNull()
+                                        && options.has("server_public_port")
+                                        || !options.get("server_public_port").isJsonNull()
+                                ) server_public_address = InetSocketAddress.createUnresolved(options.get("server_public_address").getAsString(), options.get("server_public_address").getAsInt());
+                                BedrockServerInfo server_info = new BedrockServerInfo(
+                                        server_name,
+                                        server_address,
+                                        server_public_address
+                                );
+                                getProxy().registerServerInfo(server_info);
+
+                            } catch (JsonSyntaxException e) {
+                                // ignore
+                            }
+                            return PacketSignal.HANDLED;
+                        }
+                        case "remove_server": {
+                            // server_name: string  |  (case-sensitive)  |  required  |
+                            try {
+                                JsonObject options = new Gson().fromJson(packet.getData(), JsonObject.class);
+                                if (options.has("server_name") && !options.get("server_name").isJsonNull()) return PacketSignal.HANDLED;
+                                String server_name = options.get("server_name").getAsString();
+                                getProxy().removeServerInfo(server_name);
                             } catch (JsonSyntaxException e) {
                                 // ignore
                             }
