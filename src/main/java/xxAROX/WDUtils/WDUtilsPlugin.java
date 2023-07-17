@@ -106,6 +106,7 @@ public class WDUtilsPlugin extends Plugin {
                                 // server_public_port: int      |      19132       |  optional  |
                                 JsonObject options = new Gson().fromJson(packet.getData(), JsonObject.class);
                                 String server_name = options.get("server_name").getAsString();
+                                if (getProxy().getServerInfo(server_name) != null) return PacketSignal.HANDLED;
                                 InetSocketAddress server_address = InetSocketAddress.createUnresolved(options.get("server_address").getAsString(), options.get("server_port").getAsInt());
                                 InetSocketAddress server_public_address = null;
                                 if (options.has("server_public_address")
@@ -120,8 +121,7 @@ public class WDUtilsPlugin extends Plugin {
                                 );
                                 getProxy().registerServerInfo(server_info);
 
-                            } catch (JsonSyntaxException e) {
-                                // ignore
+                            } catch (JsonSyntaxException ignore) {
                             }
                             return PacketSignal.HANDLED;
                         }
@@ -132,8 +132,7 @@ public class WDUtilsPlugin extends Plugin {
                                 if (options.has("server_name") && !options.get("server_name").isJsonNull()) return PacketSignal.HANDLED;
                                 String server_name = options.get("server_name").getAsString();
                                 getProxy().removeServerInfo(server_name);
-                            } catch (JsonSyntaxException e) {
-                                // ignore
+                            } catch (JsonSyntaxException ignore) {
                             }
                             return PacketSignal.HANDLED;
                         }
