@@ -58,9 +58,8 @@ public class WDUtilsPlugin extends Plugin {
             // ScriptCustomEventPacket (if enabled)
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
                 BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
-                builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventDefinition.getSerializer(), scriptCustomEventDefinition.getId());
-                scriptCustomEventDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
-                if (scriptCustomEventDefinition == null) builder.registerPacket(ScriptCustomEventPacket::new, ScriptCustomEventSerializer_v291.INSTANCE, 0xb1);
+                if (scriptCustomEventDefinition == null || scriptCustomEventDefinition.getSerializer() == null) builder.registerPacket(ScriptCustomEventPacket::new, ScriptCustomEventSerializer_v291.INSTANCE, 0xb1);
+                else builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventDefinition.getSerializer(), scriptCustomEventDefinition.getId());
             }
             return builder;
         });
