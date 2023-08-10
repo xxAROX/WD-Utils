@@ -1,5 +1,7 @@
 # WD-Utils
 
+> #### ![GitHub all releases](https://img.shields.io/github/downloads/xxAROX/WD-Utils/total?color=violet&label=Downloads&style=flat-square)
+
 ### There are some helpful utility stuff that is not implemented?
 > Feel free to create a pull-request or create an issue *(first preferred :D)*
 
