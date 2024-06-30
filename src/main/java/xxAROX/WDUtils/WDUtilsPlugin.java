@@ -3,19 +3,17 @@ package xxAROX.WDUtils;
 import com.google.gson.*;
 import dev.waterdog.waterdogpe.event.defaults.PlayerDisconnectedEvent;
 import dev.waterdog.waterdogpe.event.defaults.PlayerLoginEvent;
-import dev.waterdog.waterdogpe.network.PacketDirection;
 import dev.waterdog.waterdogpe.network.protocol.ProtocolCodecs;
 import dev.waterdog.waterdogpe.network.serverinfo.BedrockServerInfo;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
+import org.cloudburstmc.protocol.bedrock.PacketDirection;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockPacketDefinition;
 import org.cloudburstmc.protocol.bedrock.codec.v291.serializer.PlaySoundSerializer_v291;
-import org.cloudburstmc.protocol.bedrock.codec.v291.serializer.ScriptCustomEventSerializer_v291;
+import org.cloudburstmc.protocol.bedrock.codec.v486.serializer.ScriptMessageSerializer_v486;
 import org.cloudburstmc.protocol.bedrock.codec.v575.serializer.PlayerAuthInputSerializer_v575;
-import org.cloudburstmc.protocol.bedrock.packet.PlaySoundPacket;
-import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.cloudburstmc.protocol.bedrock.packet.ScriptCustomEventPacket;
-import org.cloudburstmc.protocol.bedrock.packet.UpdateSoftEnumPacket;
+import org.cloudburstmc.protocol.bedrock.data.PacketRecipient;
+import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.PacketSignal;
 import xxAROX.WDForms.WDForms;
 import xxAROX.WDUtils.commands.PluginsCommand;
@@ -43,26 +41,23 @@ public class WDUtilsPlugin extends Plugin {
         ProtocolCodecs.addUpdater((builder, bedrockCodec) -> {
             // UpdateSoftEnumPacket
             BedrockPacketDefinition<UpdateSoftEnumPacket> updateSoftEnumDefinition = bedrockCodec.getPacketDefinition(UpdateSoftEnumPacket.class);
-            builder.registerPacket(UpdateSoftEnumPacket::new, updateSoftEnumDefinition.getSerializer(), updateSoftEnumDefinition.getId());
+            builder.registerPacket(UpdateSoftEnumPacket::new, updateSoftEnumDefinition.getSerializer(), updateSoftEnumDefinition.getId(), PacketRecipient.CLIENT);
 
             // PlayerAuthInputPacket
             BedrockPacketDefinition<PlayerAuthInputPacket> authInputDefinition = bedrockCodec.getPacketDefinition(PlayerAuthInputPacket.class);
-            if (authInputDefinition == null) authInputDefinition = new BedrockPacketDefinition<>(0x90, PlayerAuthInputPacket::new, new PlayerAuthInputSerializer_v575());
-            builder.registerPacket(PlayerAuthInputPacket::new, authInputDefinition.getSerializer(), authInputDefinition.getId());
+            if (authInputDefinition == null) authInputDefinition = new BedrockPacketDefinition<>(0x90, PlayerAuthInputPacket::new, new PlayerAuthInputSerializer_v575(), PacketRecipient.SERVER);
+            builder.registerPacket(PlayerAuthInputPacket::new, authInputDefinition.getSerializer(), authInputDefinition.getId(), PacketRecipient.SERVER);
 
             // PlaySoundPacket
             BedrockPacketDefinition<PlaySoundPacket> playSoundDefinition = bedrockCodec.getPacketDefinition(PlaySoundPacket.class);
-            if (playSoundDefinition == null) playSoundDefinition = new BedrockPacketDefinition<>(0x56, PlaySoundPacket::new, PlaySoundSerializer_v291.INSTANCE);
-            builder.registerPacket(PlaySoundPacket::new, playSoundDefinition.getSerializer(), playSoundDefinition.getId());
+            if (playSoundDefinition == null) playSoundDefinition = new BedrockPacketDefinition<>(0x56, PlaySoundPacket::new, PlaySoundSerializer_v291.INSTANCE, PacketRecipient.CLIENT);
+            builder.registerPacket(PlaySoundPacket::new, playSoundDefinition.getSerializer(), playSoundDefinition.getId(), PacketRecipient.CLIENT);
 
-            // ScriptCustomEventPacket (if enabled)
+            // ScriptMessagePacket (if enabled)
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
-                BedrockPacketDefinition<ScriptCustomEventPacket> scriptCustomEventDefinition = bedrockCodec.getPacketDefinition(ScriptCustomEventPacket.class);
-                if (scriptCustomEventDefinition == null) {
-                    builder.registerPacket(ScriptCustomEventPacket::new, ScriptCustomEventSerializer_v291.INSTANCE, 0xb1);
-                } else {
-                    builder.registerPacket(ScriptCustomEventPacket::new, scriptCustomEventDefinition.getSerializer(), scriptCustomEventDefinition.getId());
-                }
+                BedrockPacketDefinition<ScriptMessagePacket> scriptMessageDefinition = bedrockCodec.getPacketDefinition(ScriptMessagePacket.class);
+                if (scriptMessageDefinition == null) builder.registerPacket(ScriptMessagePacket::new, ScriptMessageSerializer_v486.INSTANCE, 0xb1, PacketRecipient.BOTH);
+                else builder.registerPacket(ScriptMessagePacket::new, scriptMessageDefinition.getSerializer(), scriptMessageDefinition.getId(), PacketRecipient.BOTH);
             }
             return builder;
         });
@@ -77,19 +72,19 @@ public class WDUtilsPlugin extends Plugin {
         }
         getProxy().getEventManager().subscribe(PlayerDisconnectedEvent.class, playerDisconnectedEvent -> PositionManager.positions.remove(playerDisconnectedEvent.getPlayer().getXuid()));
         getProxy().getEventManager().subscribe(PlayerLoginEvent.class, event -> event.getPlayer().getPluginPacketHandlers().add((bedrockPacket, direction) -> {
-            if (direction.equals(PacketDirection.FROM_USER) && bedrockPacket instanceof PlayerAuthInputPacket packet) PositionManager.cache(event.getPlayer(), packet);
+            if (direction.equals(PacketDirection.CLIENT_BOUND) && bedrockPacket instanceof PlayerAuthInputPacket packet) PositionManager.cache(event.getPlayer(), packet);
             if (getConfig().getBoolean("enable-script-event-actions", false)) {
-                if (direction.equals(PacketDirection.FROM_SERVER) && bedrockPacket instanceof ScriptCustomEventPacket packet) {
-                    if (!packet.getEventName().toLowerCase().startsWith(IDENTIFIER)) return PacketSignal.HANDLED; // dylan thinks this is a serverbound packet
+                if (direction.equals(PacketDirection.CLIENT_BOUND) && bedrockPacket instanceof ScriptMessagePacket packet) {
+                    if (!packet.getChannel().toLowerCase().startsWith(IDENTIFIER)) return PacketSignal.HANDLED; // dylan thinks this is a serverbound packet
 
-                    switch (packet.getEventName().toLowerCase().replace(IDENTIFIER, "")) {
+                    switch (packet.getChannel().toLowerCase().replace(IDENTIFIER, "")) {
                         case "dispatch_command": {
-                            getProxy().dispatchCommand(event.getPlayer(), packet.getData());
+                            getProxy().dispatchCommand(event.getPlayer(), packet.getMessage());
                             return PacketSignal.HANDLED;
                         }
                         case "set_permissions": {
                             try {
-                                JsonArray perms = new Gson().fromJson(packet.getData(), JsonArray.class);
+                                JsonArray perms = new Gson().fromJson(packet.getMessage(), JsonArray.class);
                                 for (String perm : perms.asList().stream().map(JsonElement::getAsString).toList()) {
                                     if (!event.getPlayer().hasPermission(perm)) event.getPlayer().addPermission(perm);
                                 }
@@ -106,7 +101,7 @@ public class WDUtilsPlugin extends Plugin {
                                 // server_port: int             |                  |  required  |
                                 // server_public_address: int   |      null        |  optional  |
                                 // server_public_port: int      |      19132       |  optional  |
-                                JsonObject options = new Gson().fromJson(packet.getData(), JsonObject.class);
+                                JsonObject options = new Gson().fromJson(packet.getMessage(), JsonObject.class);
                                 if (!options.has("server_name") || options.get("server_name").isJsonNull()) return PacketSignal.HANDLED;
                                 String server_name = options.get("server_name").getAsString();
                                 if (getProxy().getServerInfo(server_name) != null) return PacketSignal.HANDLED;
@@ -129,7 +124,7 @@ public class WDUtilsPlugin extends Plugin {
                         case "remove_server": {
                             // server_name: string  |  (case-sensitive)  |  required  |
                             try {
-                                JsonObject options = new Gson().fromJson(packet.getData(), JsonObject.class);
+                                JsonObject options = new Gson().fromJson(packet.getMessage(), JsonObject.class);
                                 if (options.has("server_name") && !options.get("server_name").isJsonNull()) return PacketSignal.HANDLED;
                                 String server_name = options.get("server_name").getAsString();
                                 getProxy().removeServerInfo(server_name);
